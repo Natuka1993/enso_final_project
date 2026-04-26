@@ -1,0 +1,6 @@
+grab-cesm/
+__pycache__/
+*.pyc
+*.nc
+.DS_Store
+.ipynb_checkpoints/

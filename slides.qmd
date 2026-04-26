@@ -1,0 +1,186 @@
+---
+title: "CESM Ocean Temperature Toolkit"
+author: "Natalia Jorbenadze"
+format: revealjs
+---
+
+# Motivation
+
+::: {.incremental}
+- CESM ocean model output is powerful but difficult to work with directly
+- Data are large, cloud-hosted, and not immediately analysis-ready
+- This project builds a lightweight Python toolkit for ocean temperature diagnostics
+:::
+
+---
+
+# Problem
+
+How can we move from raw CESM ocean temperature output to interpretable climate diagnostics?
+
+::: {.incremental}
+- Surface ocean temperature
+- Climatology
+- Anomalies
+- Variability time series
+:::
+
+---
+
+# Package Goal
+
+`enso_toolkit` simplifies a basic climate-analysis workflow:
+
+```python
+da = open_cesm_temp_surface()
+anom = compute_global_mean_anomaly(da)
+```
+
+::: {.incremental}
+- Reduces repeated code
+- Makes the workflow reusable
+- Turns raw data into diagnostics
+:::
+
+---
+
+# Package Structure
+
+```text
+enso_final_project/
+├── enso_toolkit/
+│   ├── __init__.py
+│   └── core.py
+├── examples/
+│   └── quickstart.py
+├── README.md
+└── pyproject.toml
+```
+
+---
+
+# Core Functions
+
+::: {.incremental}
+- `open_cesm_temp_surface()`
+- `summarize_dataarray()`
+- `plot_first_timestep()`
+- `compute_spatial_mean()`
+- `compute_monthly_climatology()`
+- `compute_monthly_anomalies()`
+- `compute_global_mean_anomaly()`
+- `compute_variance()`
+:::
+
+---
+
+# Key Function: Data Access
+
+```python
+def open_cesm_temp_surface():
+    da = open_cesm2le(
+        "TEMP",
+        component="ocn",
+        scenario="historical",
+        forcing="cmip6",
+        time_slice=("1990-01", "1991-12"),
+        members=0,
+    )
+    return da.isel(z_t=0)
+```
+
+::: {.incremental}
+- Opens CESM ocean temperature
+- Extracts the surface layer
+- Returns an analysis-ready `xarray.DataArray`
+:::
+
+---
+
+# Key Function: Anomaly Time Series
+
+```python
+spatial_mean = da.mean(dim=["nlat", "nlon"]).load()
+climatology = spatial_mean.groupby("time.month").mean("time")
+global_anom = spatial_mean.groupby("time.month") - climatology
+```
+
+::: {.incremental}
+- Computes spatial mean first for speed
+- Removes the monthly climatology
+- Produces a temperature anomaly time series
+:::
+
+---
+
+# Result 1: Surface Temperature
+
+![Surface ocean temperature](your_map.png)
+
+---
+
+# Result 2: Anomaly Time Series
+
+![Temperature anomaly time series](your_timeseries.png)
+
+---
+
+# Variability Metric
+
+```python
+variance = compute_variance(global_anom)
+```
+
+::: {.incremental}
+- Variance summarizes the strength of variability
+- Adds a quantitative diagnostic beyond plotting
+- Useful for comparing longer runs later
+:::
+
+---
+
+# Design Tradeoffs
+
+::: {.incremental}
+- Used a short time window for fast prototyping
+- Computed spatial mean before climatology to reduce compute time
+- Focused on a reliable pipeline instead of many unfinished features
+- Niño 3.4 masking is future work due to CESM grid complexity
+:::
+
+---
+
+# Reflection
+
+If I started again, I would:
+
+::: {.incremental}
+- Set up the package structure earlier
+- Separate plotting from analysis functions
+- Improve ocean-grid handling
+- Extend to longer time periods
+:::
+
+---
+
+# Future Work
+
+::: {.incremental}
+- Implement Niño 3.4 index
+- Extend time window
+- Add ensemble members
+- Compare with CAMulator
+- Improve visualizations
+:::
+
+---
+
+# Conclusion
+
+::: {.incremental}
+- Built an installable Python package for CESM ocean analysis
+- Implemented climatology, anomaly, and variability workflows
+- Generated interpretable climate diagnostics
+- Established a foundation for ENSO analysis
+:::
+
