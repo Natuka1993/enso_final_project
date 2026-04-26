@@ -1,8 +1,0 @@
-README.md
-pyproject.toml
-enso_toolkit/__init__.py
-enso_toolkit/core.py
-enso_toolkit.egg-info/PKG-INFO
-enso_toolkit.egg-info/SOURCES.txt
-enso_toolkit.egg-info/dependency_links.txt
-enso_toolkit.egg-info/top_level.txt
