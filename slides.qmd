@@ -51,15 +51,14 @@ nino = compute_nino34_index(da)
 ```text
 enso_final_project/
 ├── enso_toolkit/
-│   ├── __init__.py
-│   ├── core.py
-│   ├── io.py
-│   └── utils.py
+│   ├── core.py      
+│   ├── io.py        
+│   ├── utils.py     
 ├── examples/
-│   └── quickstart.py
-├── README.md
-├── research_notes.md
+│   ├── quickstart.py
+│   ├── exploration.ipynb   
 ├── slides.qmd
+├── README.md
 └── pyproject.toml
 ```
 
