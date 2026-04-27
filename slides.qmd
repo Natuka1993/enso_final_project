@@ -1,5 +1,6 @@
 ---
-title: "CESM Ocean Temperature Toolkit"
+title: "Evaluation of ENSO Variability in CESM Using a Python Analysis Toolkit"
+institute: "CU Boulder"
 author: "Natalia Jorbenadze"
 format: revealjs
 ---
@@ -7,11 +8,17 @@ format: revealjs
 # Motivation
 
 ::: {.incremental}
-- CESM ocean model output is powerful but difficult to work with directly
-- Data are large, cloud-hosted, and not immediately analysis-ready
-- ENSO is a key mode of ocean–atmosphere variability affecting global climate
-- This project builds a lightweight Python toolkit for ENSO-related ocean temperature diagnostics
+- ENSO is the dominant mode of interannual climate variability and plays a central role in global climate dynamics
+- Studying ENSO requires analyzing variability in ocean temperature fields
+- CESM provides detailed ocean model output, but the data are large, cloud-hosted, and not immediately analysis-ready
+- This project builds a lightweight Python toolkit to extract ENSO-related signals from CESM data
 :::
+
+<style>
+.reveal h1 {
+  font-size: 2.2em;
+}
+</style>
 
 ---
 
@@ -233,8 +240,6 @@ variance = compute_variance(global_anom)
 
 ::: {.incremental}
 - CESM model output used in this project
-- CAMulator datasets provided by instructor
-- Satellite datasets as future work: MODIS, TRMM, ASCAT
 :::
 
 ---
