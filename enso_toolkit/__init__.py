@@ -7,7 +7,11 @@ from .core import (
     compute_monthly_anomalies,
     compute_global_mean_anomaly,
     compute_variance,
+    compute_nino34_index,
 )
+
+from .io import open_cesm_temp
+from .utils import validate_dataarray
 
 __all__ = [
     "open_cesm_temp_surface",
@@ -18,4 +22,7 @@ __all__ = [
     "compute_monthly_anomalies",
     "compute_global_mean_anomaly",
     "compute_variance",
+    "compute_nino34_index",
+    "open_cesm_temp",
+    "validate_dataarray",
 ]

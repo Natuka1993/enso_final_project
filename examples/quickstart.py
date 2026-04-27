@@ -1,12 +1,14 @@
 from enso_toolkit import (
     open_cesm_temp_surface,
     summarize_dataarray,
-    plot_first_timestep,
+    compute_global_mean_anomaly,
     compute_variance,
+    compute_nino34_index,
 )
 
 import matplotlib.pyplot as plt
 import pandas as pd
+
 
 print("Opening data...")
 da = open_cesm_temp_surface()
@@ -16,40 +18,85 @@ summary = summarize_dataarray(da)
 for k, v in summary.items():
     print(f"{k}: {v}")
 
-print("\nPlotting first timestep...")
-plot_first_timestep(da)
 
-print("\nComputing anomaly time series...")
+# --------------------------------------------------
+# Figure 1: Surface temperature map
+# --------------------------------------------------
 
-# Step 1: spatial mean over model grid
-spatial_mean = da.mean(dim=["nlat", "nlon"]).load()
+print("\nSaving surface temperature map...")
 
-# Step 2: monthly climatology of spatial mean
-climatology = spatial_mean.groupby("time.month").mean("time")
+surface = da.isel(time=0).squeeze().load()
 
-# Step 3: monthly anomalies
-global_anom = spatial_mean.groupby("time.month") - climatology
+plt.figure(figsize=(10, 5))
+surface.plot(
+    cmap="RdBu_r",
+    robust=True,
+    cbar_kwargs={"label": "Temperature (°C)"},
+)
+plt.title("Surface Ocean Temperature")
+plt.axis("off")
+plt.tight_layout()
+plt.savefig("surface_temp.png", dpi=300, bbox_inches="tight")
+plt.show()
 
-print("\nTime series values:")
+
+# --------------------------------------------------
+# Figure 2: Spatial mean anomaly time series
+# --------------------------------------------------
+
+print("\nComputing spatial mean anomaly time series...")
+
+global_anom = compute_global_mean_anomaly(da)
+
+print("\nSpatial mean anomaly values:")
 print(global_anom.values)
 
-# Step 4: variance
 variance = compute_variance(global_anom)
-print(f"\nVariance of anomaly time series: {variance}")
+print(f"\nVariance of spatial mean anomaly time series: {variance}")
 
-# Step 5: make clean time labels
 time = pd.to_datetime([str(t)[:10] for t in global_anom.time.values])
 y = global_anom.squeeze().values
 
-# Step 6: plot anomaly time series
 plt.figure(figsize=(10, 4))
-plt.plot(time, y, marker="o", label="Monthly anomaly")
+plt.plot(time, y, marker="o", label="Spatial mean anomaly")
 plt.axhline(0, linewidth=1)
-
 plt.title("Spatial Mean Surface Temperature Anomaly")
 plt.xlabel("Time")
 plt.ylabel("Temperature Anomaly (°C)")
 plt.xticks(rotation=45)
 plt.legend()
 plt.tight_layout()
+plt.savefig("global_anomaly.png", dpi=300, bbox_inches="tight")
 plt.show()
+
+
+# --------------------------------------------------
+# Figure 3: Approximate Niño 3.4 index
+# --------------------------------------------------
+
+print("\nComputing approximate Niño 3.4 index...")
+
+nino = compute_nino34_index(da)
+
+print("\nApproximate Niño 3.4 index values:")
+print(nino.values)
+
+time_nino = pd.to_datetime([str(t)[:10] for t in nino.time.values])
+y_nino = nino.squeeze().values
+
+plt.figure(figsize=(10, 4))
+plt.plot(time_nino, y_nino, marker="o", label="Approx. Niño 3.4")
+plt.axhline(0, linewidth=1)
+plt.title("Approximate Niño 3.4 Index")
+plt.xlabel("Time")
+plt.ylabel("Temperature Anomaly (°C)")
+plt.xticks(rotation=45)
+plt.legend()
+plt.tight_layout()
+plt.savefig("nino34.png", dpi=300, bbox_inches="tight")
+plt.show()
+
+print("\nSaved figures:")
+print("- surface_temp.png")
+print("- global_anomaly.png")
+print("- nino34.png")
