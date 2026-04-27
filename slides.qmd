@@ -5,20 +5,21 @@ author: "Natalia Jorbenadze"
 format: revealjs
 ---
 
-# Motivation
-
-::: {.incremental}
-- ENSO is the dominant mode of interannual climate variability and plays a central role in global climate dynamics
-- Studying ENSO requires analyzing variability in ocean temperature fields
-- CESM provides detailed ocean model output, but the data are large, cloud-hosted, and not immediately analysis-ready
-- This project builds a lightweight Python toolkit to extract ENSO-related signals from CESM data
-:::
-
 <style>
 .reveal h1 {
   font-size: 2.2em;
 }
 </style>
+
+# Motivation
+
+
+- ENSO is a dominant mode of interannual climate variability and plays a central role in global climate dynamics
+- ENSO is a well-understood signal and a strong starting point for building and testing analysis tools
+- Studying ENSO requires analyzing ocean temperature variability, especially anomalies
+- CESM output is large, cloud-hosted, and not immediately analysis-ready
+- This project builds a lightweight Python toolkit to extract ENSO-related signals from CESM data
+
 
 ---
 
@@ -26,13 +27,12 @@ format: revealjs
 
 How can we move from raw CESM ocean temperature output to interpretable climate diagnostics?
 
-::: {.incremental}
+
 - Surface ocean temperature
 - Climatology
 - Anomalies
 - Variability time series
 - Approximate Niño 3.4-style index
-:::
 
 ---
 
@@ -46,11 +46,12 @@ global_anom = compute_global_mean_anomaly(da)
 nino = compute_nino34_index(da)
 ```
 
-::: {.incremental}
+
 - Reduces repeated code
-- Makes the workflow reusable
+- Makes the workflow simple and reusable
 - Turns raw model output into climate diagnostics
-:::
+- Prioritizes a streamlined workflow over many unfinished features
+
 
 ---
 
@@ -74,19 +75,19 @@ enso_final_project/
 
 # Package Design
 
-::: {.incremental}
+
 - `io.py`: data access functions
 - `utils.py`: validation and helper functions
 - `core.py`: main analysis and plotting functions
 - `quickstart.py`: example workflow showing how the package is used
 - Designed to separate data access, validation, and analysis for clarity and reuse
-:::
+
 
 ---
 
 # Core Functions
 
-::: {.incremental}
+
 - `open_cesm_temp_surface()`
 - `summarize_dataarray()`
 - `plot_first_timestep()`
@@ -96,11 +97,11 @@ enso_final_project/
 - `compute_global_mean_anomaly()`
 - `compute_variance()`
 - `compute_nino34_index()`
-:::
+
 
 ---
 
-# Key Function: Data Access
+# Data Access
 
 ```python
 def open_cesm_temp_surface(time_slice=("1990-01", "1991-12"), member=0):
@@ -109,16 +110,16 @@ def open_cesm_temp_surface(time_slice=("1990-01", "1991-12"), member=0):
     return da.isel(z_t=0)
 ```
 
-::: {.incremental}
+
 - Opens CESM ocean potential temperature
 - Validates that expected dimensions are present
 - Extracts the surface layer
 - Returns an analysis-ready `xarray.DataArray`
-:::
+
 
 ---
 
-# Key Function: Input Validation
+# Input Validation
 
 ```python
 def validate_dataarray(da, required_dims=None):
@@ -134,15 +135,15 @@ def validate_dataarray(da, required_dims=None):
             raise ValueError(f"Missing required dimensions: {missing}")
 ```
 
-::: {.incremental}
+
 - Adds basic error handling
 - Prevents analysis from running on invalid inputs
 - Makes the package safer and easier to debug
-:::
+
 
 ---
 
-# Key Function: Anomaly Time Series
+# Anomaly Time Series
 
 ```python
 spatial_mean = compute_spatial_mean(da).load()
@@ -150,16 +151,15 @@ climatology = compute_monthly_climatology(spatial_mean)
 global_anom = spatial_mean.groupby("time.month") - climatology
 ```
 
-::: {.incremental}
 - Computes spatial mean first for speed
 - Removes the monthly climatology
 - Produces a temperature anomaly time series
 - Removing seasonal cycle helps isolate variability such as ENSO
-:::
+
 
 ---
 
-# Key Function: Approximate Niño 3.4
+# Approximate Niño 3.4
 
 ```python
 nino_region = da.isel(
@@ -172,23 +172,20 @@ climatology = compute_monthly_climatology(nino_mean)
 nino_anom = nino_mean.groupby("time.month") - climatology
 ```
 
-::: {.incremental}
 - Approximates a Niño 3.4-style regional index
 - Uses grid-index slicing as a prototype
-- ENSO signal becomes clearer when focusing on this region
+- Focuses on a tropical Pacific region commonly used to track ENSO variability
 - Future version will use exact lat/lon bounds on the CESM ocean grid
-:::
+
 
 ---
 
 # Results Overview
 
-::: {.incremental}
 - Validate physical structure
 - Remove seasonal cycle
 - Isolate variability
 - Identify ENSO-related signal
-:::
 
 ---
 
@@ -196,9 +193,7 @@ nino_anom = nino_mean.groupby("time.month") - climatology
 
 ![](surface_temp.png){width=90%}
 
-::: {.incremental}
 - Warm tropics, cold high latitudes → physically realistic
-:::
 
 ---
 
@@ -216,9 +211,8 @@ nino_anom = nino_mean.groupby("time.month") - climatology
 
 ![](nino34.png){width=90%}
 
-::: {.incremental}
-- Focuses on ENSO region → stronger, more structured variability signal
-:::
+- Focuses on the ENSO region
+- Helps isolate a clearer regional variability signal
 
 ---
 
@@ -228,89 +222,42 @@ nino_anom = nino_mean.groupby("time.month") - climatology
 variance = compute_variance(global_anom)
 ```
 
-::: {.incremental}
 - Spatial mean anomaly variance: `0.0075`
 - Variance summarizes the strength of variability
 - Useful for comparing longer runs, regions, or models later
-:::
 
 ---
 
-# Data Sources
+# Tradeoffs
 
-::: {.incremental}
-- CESM model output used in this project
-:::
+- Short time window (1990–1991) for faster prototyping and iteration
+- Spatial averaging applied early to reduce computational cost
+- Niño 3.4 index is approximate due to CESM ocean grid complexity
+- Approximate Niño 3.4 uses grid-based selection rather than exact lat/lon masking
 
----
-
-# Scientific Context
-
-::: {.incremental}
-- ENSO is a dominant mode of interannual climate variability
-- Machine-learning climate models such as CAMulator may reproduce large-scale patterns
-- But they may differ in variability amplitude and structure
-- This toolkit builds diagnostics to evaluate that variability
-:::
 
 ---
 
-# Design Tradeoffs
+# Reflection 
 
-::: {.incremental}
-- Used a short time window for fast prototyping
-- Computed spatial mean before climatology to reduce compute time
-- Added `io.py` and `utils.py` to separate data access, validation, and analysis
-- Niño 3.4 index is approximate due to CESM ocean-grid complexity
-:::
-
----
-
-# Reflection
-
-If I started again, I would:
-
-::: {.incremental}
 - Set up the package structure earlier
-- Separate plotting from analysis functions even more cleanly
-- Improve ocean-grid latitude/longitude handling
-- Extend to longer time periods
-:::
+- Separate plotting from analysis more cleanly
+- Improve coordinate handling and exact Niño 3.4 masking
+- Extend the time period and add ensemble members
 
 ---
 
-# Future Work
+# Future Extensions
 
-::: {.incremental}
-- Implement exact Niño 3.4 lat/lon masking
-- Extend time window
-- Add additional ensemble members
-- Compare with CAMulator
-- Improve visualization utilities
-:::
-
----
-
-# Future Extensions & Significance
-
-::: {.incremental}
+- Apply framework to other climate modes: IOD, WES, AMOC
 - Incorporate satellite observations
-- Analyze additional climate modes: IOD, WES, AMOC
-- Evaluate ML-based model variability
-
-- Important for:
-  - climate prediction
-  - large ensemble simulations
-  - integration with remote sensing
-:::
+- Compare traditional climate models with machine learning–based approaches
+- Support future work in climate prediction and model evaluation
 
 ---
 
 # Conclusion
 
-::: {.incremental}
-- Built an installable Python package for CESM ocean analysis
-- Added modular structure with `core.py`, `io.py`, and `utils.py`
-- Implemented climatology, anomaly, variance, and approximate Niño 3.4 workflows
-- Provides a foundation for analyzing ENSO variability in climate models
-:::
+- Built an installable Python toolkit for CESM ocean analysis
+- Overall, this project provides a simple, reusable foundation for analyzing ENSO variability in climate models, and sets the stage for more advanced diagnostics and model comparisons
+
