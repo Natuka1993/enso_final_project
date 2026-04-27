@@ -91,8 +91,7 @@ This project provides a foundation for:
 
 ## Data Sources
 
-- CESM model output  
-- CAMulator datasets (course-provided)  
+- CESM model output   
 - (Future work) satellite datasets: MODIS, TRMM, ASCAT  
 
 ---
