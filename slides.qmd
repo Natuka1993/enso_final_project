@@ -9,6 +9,7 @@ format: revealjs
 ::: {.incremental}
 - CESM ocean model output is powerful but difficult to work with directly
 - Data are large, cloud-hosted, and not immediately analysis-ready
+- ENSO is a key mode of ocean–atmosphere variability affecting global climate
 - This project builds a lightweight Python toolkit for ENSO-related ocean temperature diagnostics
 :::
 
@@ -71,6 +72,7 @@ enso_final_project/
 - `utils.py`: validation and helper functions
 - `core.py`: main analysis and plotting functions
 - `quickstart.py`: example workflow showing how the package is used
+- Designed to separate data access, validation, and analysis for clarity and reuse
 :::
 
 ---
@@ -145,6 +147,7 @@ global_anom = spatial_mean.groupby("time.month") - climatology
 - Computes spatial mean first for speed
 - Removes the monthly climatology
 - Produces a temperature anomaly time series
+- Removing seasonal cycle helps isolate variability such as ENSO
 :::
 
 ---
@@ -165,7 +168,19 @@ nino_anom = nino_mean.groupby("time.month") - climatology
 ::: {.incremental}
 - Approximates a Niño 3.4-style regional index
 - Uses grid-index slicing as a prototype
+- ENSO signal becomes clearer when focusing on this region
 - Future version will use exact lat/lon bounds on the CESM ocean grid
+:::
+
+---
+
+# Results Overview
+
+::: {.incremental}
+- Validate physical structure
+- Remove seasonal cycle
+- Isolate variability
+- Identify ENSO-related signal
 :::
 
 ---
@@ -292,5 +307,5 @@ If I started again, I would:
 - Built an installable Python package for CESM ocean analysis
 - Added modular structure with `core.py`, `io.py`, and `utils.py`
 - Implemented climatology, anomaly, variance, and approximate Niño 3.4 workflows
-- Established a foundation for future ENSO and CAMulator comparison
+- Provides a foundation for analyzing ENSO variability in climate models
 :::
