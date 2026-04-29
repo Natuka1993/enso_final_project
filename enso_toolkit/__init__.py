@@ -8,12 +8,14 @@ from .core import (
     compute_global_mean_anomaly,
     compute_variance,
     compute_nino34_index,
+    attach_pop_grid,
+    compute_nino34_index_latlon,
 )
 
 from .io import open_cesm_temp
 from .utils import validate_dataarray
 
-__all__ = [
+_all_ = [
     "open_cesm_temp_surface",
     "summarize_dataarray",
     "plot_first_timestep",
@@ -23,6 +25,8 @@ __all__ = [
     "compute_global_mean_anomaly",
     "compute_variance",
     "compute_nino34_index",
+    "attach_pop_grid",
+    "compute_nino34_index_latlon",
     "open_cesm_temp",
     "validate_dataarray",
 ]

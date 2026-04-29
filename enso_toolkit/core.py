@@ -33,7 +33,7 @@ def plot_first_timestep(da):
     """
     validate_dataarray(da, required_dims=["time"])
 
-    first = da.isel(time=0).squeeze().load()
+    first = da.isel(time=0).squeeze()
 
     plt.figure(figsize=(10, 5))
     first.plot(
@@ -77,10 +77,12 @@ def compute_monthly_anomalies(da):
 def compute_global_mean_anomaly(da):
     """
     Compute spatial mean monthly anomaly time series.
+
+    This function preserves xarray's lazy evaluation when possible.
     """
     validate_dataarray(da, required_dims=["time", "nlat", "nlon"])
 
-    spatial_mean = compute_spatial_mean(da).load()
+    spatial_mean = compute_spatial_mean(da)
     climatology = compute_monthly_climatology(spatial_mean)
     return spatial_mean.groupby("time.month") - climatology
 
@@ -116,6 +118,57 @@ def compute_nino34_index(da):
         nlon=slice(180, 260),
     )
 
-    nino_mean = compute_spatial_mean(nino_region).load()
+    nino_mean = compute_spatial_mean(nino_region)
     climatology = compute_monthly_climatology(nino_mean)
     return nino_mean.groupby("time.month") - climatology
+
+
+def attach_pop_grid(da):
+    """
+    Attach POP grid latitude, longitude, and area coordinates to a CESM DataArray.
+    """
+    import pop_tools
+
+    validate_dataarray(da, required_dims=["nlat", "nlon"])
+
+    grid = pop_tools.get_grid("POP_gx1v7")
+
+    if grid["TLAT"].shape != (da.sizes["nlat"], da.sizes["nlon"]):
+        raise ValueError("POP grid shape does not match input DataArray shape.")
+
+    return da.assign_coords(
+        TLAT=(("nlat", "nlon"), grid["TLAT"].values),
+        TLONG=(("nlat", "nlon"), grid["TLONG"].values),
+        TAREA=(("nlat", "nlon"), grid["TAREA"].values),
+    )
+
+
+def compute_nino34_index_latlon(da):
+    """
+    Compute Niño 3.4 index using POP grid latitude/longitude masking.
+
+    Niño 3.4 region: 5°S–5°N, 170°W–120°W.
+    In 0–360 longitude, this is 190°E–240°E.
+
+    This version uses POP grid coordinates and area weighting.
+    """
+    validate_dataarray(da, required_dims=["time", "nlat", "nlon"])
+
+    da = attach_pop_grid(da)
+
+    mask = (
+        (da["TLAT"] >= -5)
+        & (da["TLAT"] <= 5)
+        & (da["TLONG"] >= 190)
+        & (da["TLONG"] <= 240)
+    )
+
+    nino_region = da.where(mask)
+    weights = da["TAREA"].where(mask).fillna(0)
+
+    nino_mean = nino_region.weighted(weights).mean(dim=["nlat", "nlon"])
+
+    climatology = compute_monthly_climatology(nino_mean)
+    nino_anom = nino_mean.groupby("time.month") - climatology
+
+    return nino_anom
