@@ -1,9 +1,9 @@
-grab-cesm/
 __pycache__/
 *.pyc
-*.nc
 .DS_Store
 .ipynb_checkpoints/
 slides_files/
 slides.html
 enso_toolkit.egg-info/
+*.nc
+grab-cesm/

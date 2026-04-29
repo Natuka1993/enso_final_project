@@ -11,6 +11,7 @@ format: revealjs
 }
 </style>
 
+
 # Motivation
 
 
@@ -33,6 +34,7 @@ How can we move from raw CESM ocean temperature output to interpretable climate 
 - Anomalies
 - Variability time series
 - Approximate Niño 3.4-style index
+- Improved Niño 3.4 index using POP grid coordinates
 
 ---
 
@@ -97,6 +99,8 @@ enso_final_project/
 - `compute_global_mean_anomaly()`
 - `compute_variance()`
 - `compute_nino34_index()`
+- `attach_pop_grid()`
+- `compute_nino34_index_latlon()`
 
 
 ---
@@ -146,12 +150,13 @@ def validate_dataarray(da, required_dims=None):
 # Anomaly Time Series
 
 ```python
-spatial_mean = compute_spatial_mean(da).load()
+spatial_mean = compute_spatial_mean(da)
 climatology = compute_monthly_climatology(spatial_mean)
 global_anom = spatial_mean.groupby("time.month") - climatology
 ```
 
 - Computes spatial mean first for speed
+- Preserves xarray lazy evaluation when possible
 - Removes the monthly climatology
 - Produces a temperature anomaly time series
 - Removing seasonal cycle helps isolate variability such as ENSO
@@ -167,7 +172,7 @@ nino_region = da.isel(
     nlon=slice(180, 260),
 )
 
-nino_mean = compute_spatial_mean(nino_region).load()
+nino_mean = compute_spatial_mean(nino_region)
 climatology = compute_monthly_climatology(nino_mean)
 nino_anom = nino_mean.groupby("time.month") - climatology
 ```
@@ -175,17 +180,37 @@ nino_anom = nino_mean.groupby("time.month") - climatology
 - Approximates a Niño 3.4-style regional index
 - Uses grid-index slicing as a prototype
 - Focuses on a tropical Pacific region commonly used to track ENSO variability
-- Future version will use exact lat/lon bounds on the CESM ocean grid
+- Useful as a first working version before exact coordinate masking
 
+
+---
+
+# Improved Niño 3.4 Mask
+
+```python
+mask = (
+    (da["TLAT"] >= -5)
+    & (da["TLAT"] <= 5)
+    & (da["TLONG"] >= 190)
+    & (da["TLONG"] <= 240)
+)
+```
+
+- Uses POP grid latitude and longitude coordinates
+- Defines Niño 3.4 as 5°S–5°N and 170°W–120°W
+- Improves on the earlier grid-index prototype
 
 ---
 
 # Results Overview
 
-- Validate physical structure
-- Remove seasonal cycle
-- Isolate variability
-- Identify ENSO-related signal
+Outputs generated using `enso_toolkit`:
+
+- Surface temperature maps
+- Spatial mean anomaly time series
+- Approximate Niño 3.4 index
+- POP grid Niño 3.4 mask
+- Comparison between approximate and lat/lon-based Niño 3.4 methods
 
 ---
 
@@ -216,6 +241,24 @@ nino_anom = nino_mean.groupby("time.month") - climatology
 
 ---
 
+## Niño 3.4 POP Grid Mask
+
+![](nino34_mask.png){width=90%}
+
+- Shows the exact Niño 3.4 region using POP grid coordinates
+- Improves spatial interpretation compared with grid-index slicing
+
+---
+
+## Niño 3.4 Method Comparison
+
+![](nino34_comparison.png){width=90%}
+
+- Compares approximate grid-index method with improved lat/lon masking
+- Demonstrates how the package can evolve from prototype to more physically accurate diagnostics
+
+---
+
 # Variability Metric
 
 ```python
@@ -228,13 +271,27 @@ variance = compute_variance(global_anom)
 
 ---
 
+# Contribution to Classmates' Projects
+
+- `tc-track-analyzer`
+  - Improved plotting utilities
+  - Added `save_path` and `show` options
+  - Standardized return values to `(fig, ax)`
+
+- `vaporspec`
+  - Implemented a diurnal cycle plotting function
+  - Computes hourly means for a selected variable
+  - Adds missing visualization functionality
+
+  ---
+
 # Tradeoffs
 
 - Short time window (1990–1991) for faster prototyping and iteration
 - Spatial averaging applied early to reduce computational cost
-- Niño 3.4 index is approximate due to CESM ocean grid complexity
-- Approximate Niño 3.4 uses grid-based selection rather than exact lat/lon masking
-
+- Initial Niño 3.4 index used grid-index slicing
+- Improved version uses POP grid coordinates and area weighting
+- More work is needed to test longer time periods and ensemble members
 
 ---
 
@@ -244,8 +301,10 @@ variance = compute_variance(global_anom)
 - Separate plotting from analysis more cleanly
 - Improve coordinate handling and exact Niño 3.4 masking
 - Extend the time period and add ensemble members
+- Add tests to check functions across different inputs
 
 ---
+
 
 # Future Extensions
 
@@ -253,11 +312,14 @@ variance = compute_variance(global_anom)
 - Incorporate satellite observations
 - Compare traditional climate models with machine learning–based approaches
 - Support future work in climate prediction and model evaluation
+- Improve documentation and add more tutorial examples
 
 ---
 
 # Conclusion
 
 - Built an installable Python toolkit for CESM ocean analysis
-- Overall, this project provides a simple, reusable foundation for analyzing ENSO variability in climate models, and sets the stage for more advanced diagnostics and model comparisons
-
+- Generated surface temperature, anomaly, and Niño 3.4 diagnostics
+- Added improved POP-grid Niño 3.4 masking
+- Published package to TestPyPI- Submitted two pull requests to classmate projects
+- Overall, this project provides a simple, reusable foundation for analyzing ENSO variability in climate models
