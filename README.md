@@ -1,19 +1,22 @@
-# ENSO Toolkit: CESM Ocean Temperature Analysis
+# ENSO Analysis Toolkit for CESM Ocean Data
 
-This project builds a lightweight Python package (`enso_toolkit`) for analyzing CESM ocean model output, with a focus on ENSO-related variability.
+A Python package for analyzing ENSO variability in CESM ocean model output, including computation of temperature anomalies and Niño 3.4 indices.
 
 ---
 
 ## Overview
 
-CESM ocean model output is large and not immediately analysis-ready.  
-This toolkit simplifies a typical workflow:
+This project provides a modular workflow for working with CESM ocean temperature data and extracting ENSO-related signals.
 
-- Load CESM ocean temperature data
-- Extract surface temperature
-- Compute climatology and anomalies
-- Generate time series diagnostics
-- Approximate Niño 3.4 index
+It includes:
+
+- Surface temperature visualization  
+- Monthly anomaly computation  
+- Global mean anomaly time series  
+- Approximate Niño 3.4 index (grid-based)  
+- POP-grid Niño 3.4 index (latitude/longitude + area-weighted)  
+
+The toolkit is designed to simplify working with large, cloud-hosted CESM datasets and provide a foundation for climate analysis workflows.
 
 ---
 
@@ -35,77 +38,104 @@ enso_final_project/
 
 ---
 
-## Notebooks
-
-- `examples/exploration.ipynb` — exploratory analysis used during development  
-  (includes intermediate calculations and testing before packaging into functions)
-
----
-
 ## Installation
 
-```bash
-pip install -e .
-```
+Clone the repository:
+
+git clone https://github.com/Natuka1993/enso_final_project.git  
+cd enso_final_project  
+
+Create and activate a conda environment:
+
+conda create -n cesm_phase1 python=3.11  
+conda activate cesm_phase1  
+
+Install the package:
+
+pip install -e .  
+
+Install dependencies:
+
+pip install grab_cesm pop-tools matplotlib xarray pandas  
 
 ---
 
-## Example Usage
+## Quick Start
 
-```python
-from enso_toolkit import (
-    open_cesm_temp_surface,
-    compute_global_mean_anomaly,
-    compute_nino34_index,
-)
+Run the example script:
 
-da = open_cesm_temp_surface()
+python examples/quickstart.py  
 
-global_anom = compute_global_mean_anomaly(da)
-nino = compute_nino34_index(da)
-```
+This will generate:
 
----
-
-## Results
-
-This workflow produces:
-
-- Global surface temperature map  
-- Spatial mean anomaly time series  
-- Approximate Niño 3.4 index  
+- surface_temp.png  
+- global_anomaly.png  
+- nino34.png  
+- nino34_comparison.png  
+- nino34_mask.png  
 
 ---
 
-## Scientific Context
+## Example Output
 
-ENSO (El Niño–Southern Oscillation) is a dominant mode of interannual climate variability.
+### Niño 3.4 Comparison
 
-This project provides a foundation for:
+![Niño 3.4 Comparison](nino34_comparison.png)
 
-- analyzing ENSO signals in CESM output  
-- comparing with machine-learning-based models (e.g., CAMulator)  
-- integrating with satellite observations  
+The POP-grid implementation produces stronger variability compared to the approximate grid-based method, demonstrating the importance of geographic masking and area weighting.
 
 ---
 
-## Data Sources
+## Features
 
-- CESM model output   
-- (Future work) satellite datasets: MODIS, TRMM, ASCAT  
+- Modular Python package structure  
+- Works with CESM NetCDF ocean data  
+- Monthly climatology and anomaly computation  
+- Multiple ENSO index methods  
+- POP-grid integration with latitude/longitude coordinates  
+- Area-weighted averaging  
 
 ---
 
-## Future Work
+## Scientific Motivation
 
-- Implement true Niño 3.4 region (lat/lon masking)  
-- Extend to longer time periods  
-- Add ensemble members  
-- Compare CESM with CAMulator output  
-- Improve visualization tools  
+ENSO is the dominant mode of interannual climate variability. Accurately computing ENSO indices requires careful preprocessing of ocean temperature data and correct spatial averaging.
+
+This project compares:
+
+- Approximate grid-based methods  
+- Physically consistent POP-grid methods  
+
+and demonstrates how proper geographic masking improves ENSO diagnostics.
+
+---
+
+## Dependencies
+
+- Python 3.11  
+- xarray  
+- numpy  
+- matplotlib  
+- pandas  
+- pop-tools  
+- grab_cesm  
+
+---
+
+## Contributing
+
+This project was developed as part of ATOC 4815/5815. Contributions and suggestions are welcome.
 
 ---
 
 ## Author
 
-Natalia Jorbenadze
+Natalia Jorbenadze  
+CU Boulder ATOC  
+
+---
+
+## License
+
+MIT License
+
