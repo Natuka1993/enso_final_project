@@ -99,7 +99,7 @@ def compute_variance(ts):
     return ts.var().item()
 
 
-def compute_nino34_index(da):
+def compute_approx_nino34_index(da):
     """
     Compute an approximate Niño 3.4-style index.
 
@@ -142,8 +142,24 @@ def attach_pop_grid(da):
         TAREA=(("nlat", "nlon"), grid["TAREA"].values),
     )
 
+def get_pop_slice(da, lat0, lat1, lon0, lon1):
+    """
+    Get slice of a DataArray from 2 lat & lon values using POP grid coords.
+    """
 
-def compute_nino34_index_latlon(da):
+    mask = (
+        (da["TLAT"] >= lat0)
+        & (da["TLAT"] <= lat1)
+        & (da["TLONG"] >= lon0)
+        & (da["TLONG"] <= lon1)
+    )
+
+    slice = da.where(mask)
+    weights = da["TAREA"].where(mask).fillna(0)
+
+    return slice, weights
+
+def compute_nino34_index(da):
     """
     Compute Niño 3.4 index using POP grid latitude/longitude masking.
 
@@ -156,15 +172,7 @@ def compute_nino34_index_latlon(da):
 
     da = attach_pop_grid(da)
 
-    mask = (
-        (da["TLAT"] >= -5)
-        & (da["TLAT"] <= 5)
-        & (da["TLONG"] >= 190)
-        & (da["TLONG"] <= 240)
-    )
-
-    nino_region = da.where(mask)
-    weights = da["TAREA"].where(mask).fillna(0)
+    nino_region, weights = get_pop_slice(da, -5, 5, 190, 240)
 
     nino_mean = nino_region.weighted(weights).mean(dim=["nlat", "nlon"])
 
@@ -172,3 +180,4 @@ def compute_nino34_index_latlon(da):
     nino_anom = nino_mean.groupby("time.month") - climatology
 
     return nino_anom
+
