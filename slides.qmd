@@ -321,5 +321,6 @@ variance = compute_variance(global_anom)
 - Built an installable Python toolkit for CESM ocean analysis
 - Generated surface temperature, anomaly, and Niño 3.4 diagnostics
 - Added improved POP-grid Niño 3.4 masking
-- Published package to TestPyPI- Submitted two pull requests to classmate projects
+- Published package to TestPyPI
+- Submitted three pull requests to classmate projects
 - Overall, this project provides a simple, reusable foundation for analyzing ENSO variability in climate models
