@@ -1,0 +1,20 @@
+[project]
+name = "enso-toolkit"
+version = "0.1.0"
+description = "Python toolkit for analyzing ENSO variability in CESM ocean output"
+authors = [
+    { name = "Natalia Jorbenadze" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "numpy",
+    "pandas",
+    "xarray",
+    "matplotlib",
+    "pop-tools",
+    "grab_cesm"
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
