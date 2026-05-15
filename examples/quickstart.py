@@ -3,8 +3,8 @@ from enso_toolkit import (
     summarize_dataarray,
     compute_global_mean_anomaly,
     compute_variance,
+    compute_approx_nino34_index,
     compute_nino34_index,
-    compute_nino34_index_latlon,
     attach_pop_grid,
 )
 
@@ -78,7 +78,7 @@ plt.show()
 
 print("\nComputing approximate Niño 3.4 index...")
 
-nino = compute_nino34_index(da).load()
+nino = compute_approx_nino34_index(da).load()
 
 print("\nApproximate Niño 3.4 index values:")
 print(nino.values)
@@ -105,7 +105,7 @@ plt.show()
 
 print("\nComputing POP-grid Niño 3.4 index...")
 
-nino_latlon = compute_nino34_index_latlon(da).load()
+nino_latlon = compute_nino34_index(da).load()
 
 print("\nPOP-grid Niño 3.4 index values:")
 print(nino_latlon.values)
